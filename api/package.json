@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "build-nutrition-db": "tsx scripts/build-nutrition-db.mts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13"
+  }
+}
