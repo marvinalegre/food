@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import readline from "readline";
 import fs from "fs";
 
-const db = new Database("./nutrition.db");
+const db = new Database("./food.db");
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS foods (
@@ -40,7 +40,7 @@ const insertMany = db.transaction((lines) => {
 });
 
 const rl = readline.createInterface({
-  input: fs.createReadStream("./data/nutrition.txt"),
+  input: fs.createReadStream("./data/food.txt"),
   crlfDelay: Infinity,
 });
 

@@ -1,11 +1,21 @@
 {
   "scripts": {
-    "build-nutrition-db": "tsx scripts/build-nutrition-db.mts"
+    "build": "nest build",
+    "build-food-db": "tsx scripts/build-food-db.mts",
+    "dev": "nest start --watch"
   },
   "dependencies": {
-    "better-sqlite3": "^12.6.2"
+    "@nestjs/common": "^11.1.16",
+    "@nestjs/core": "^11.1.16",
+    "@nestjs/platform-express": "^11.1.16",
+    "better-sqlite3": "^12.6.2",
+    "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13"
+    "@nestjs/cli": "^11.0.16",
+    "@nestjs/schematics": "^11.0.9",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^25.4.0",
+    "typescript": "^5.9.3"
   }
 }
