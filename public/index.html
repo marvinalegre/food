@@ -106,9 +106,26 @@
       }
 
       footer {
-        margin-top: 16px;
+        margin-top: 20px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
         font-size: 12px;
         color: var(--muted);
+      }
+
+      footer p {
+        margin: 4px 0;
+      }
+
+      footer a {
+        color: #9ca3af; /* softer gray */
+        text-decoration: none;
+        transition: color 0.15s ease;
+      }
+
+      footer a:hover {
+        color: #6b7280; /* slightly darker on hover */
+        text-decoration: underline;
       }
 
       /* ===== Skeleton ===== */
@@ -191,7 +208,18 @@
         </div>
       </div>
 
-      <footer>source: https://www.invive.com/calorie.html</footer>
+      <footer>
+        <p>
+          source:
+          <a href="https://www.invive.com/calorie.html"
+            >https://www.invive.com/calorie.html</a
+          >
+        </p>
+        <p>
+          developed by:
+          <a href="https://github.com/marvinalegre">Marvin Alegre</a>
+        </p>
+      </footer>
     </div>
 
     <script>
