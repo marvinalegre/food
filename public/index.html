@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Food Table</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 24px;
+      }
+      h1 {
+        margin-bottom: 16px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+        font-size: 14px;
+      }
+      th {
+        background-color: #f4f4f4;
+      }
+      tr:nth-child(even) {
+        background-color: #fafafa;
+      }
+      footer {
+        margin-top: 24px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Food (sorted by calorie density)</h1>
+
+    <table id="food-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Serving Size</th>
+          <th>Protein (g)</th>
+          <th>Carbs (g)</th>
+          <th>Fat (g)</th>
+          <th>Sat. Fat (g)</th>
+          <th>Cholesterol (mg)</th>
+          <th>Calories</th>
+          <th>Weight (g)</th>
+          <th>Cal Density (cal/g)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data will be inserted here -->
+      </tbody>
+    </table>
+
+    <footer>source: https://www.invive.com/calorie.html</footer>
+
+    <script>
+      async function getFood() {
+        const isLocal =
+          location.hostname === "localhost" ||
+          location.hostname === "127.0.0.1";
+
+        const baseUrl = isLocal
+          ? "http://localhost:8787"
+          : "https://food.marvinalegre.workers.dev";
+
+        const res = await fetch(`${baseUrl}/foods`);
+        return res.json();
+      }
+
+      function renderFood(food) {
+        const tbody = document.querySelector("#food-table tbody");
+
+        tbody.innerHTML = "";
+
+        food.forEach((item) => {
+          const row = document.createElement("tr");
+
+          row.innerHTML = `
+            <td>${item.description}</td>
+            <td>${item.serving_size}</td>
+            <td>${item.protein_g}</td>
+            <td>${item.carbohydrate_g}</td>
+            <td>${item.fat_g}</td>
+            <td>${item.saturated_fat_g}</td>
+            <td>${item.cholesterol_mg}</td>
+            <td>${item.calories}</td>
+            <td>${item.weight_g}</td>
+            <td>${Number(item.calorie_density).toFixed(2)}</td>
+          `;
+
+          tbody.appendChild(row);
+        });
+      }
+
+      async function init() {
+        try {
+          const food = await getFood();
+          renderFood(food);
+        } catch (err) {
+          console.error("Failed to load food:", err);
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>
