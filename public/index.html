@@ -35,14 +35,14 @@
       }
 
       h1 {
+        margin: 0;
         font-size: 22px;
-        margin-bottom: 6px;
       }
 
       .subtitle {
-        color: var(--muted);
+        margin: 6px 0 16px;
         font-size: 13px;
-        margin-bottom: 16px;
+        color: var(--muted);
       }
 
       .card {
@@ -56,18 +56,12 @@
       .table-wrapper {
         overflow-x: auto;
         width: 100%;
-        border-radius: 12px;
       }
 
       table {
         border-collapse: collapse;
-        width: max-content; /* key fix */
-        min-width: 100%; /* still fills container if small */
-      }
-
-      th,
-      td {
-        white-space: nowrap;
+        width: 100%;
+        table-layout: fixed; /* 🔥 key fix */
       }
 
       thead th {
@@ -76,8 +70,8 @@
         background: var(--card);
         border-bottom: 1px solid var(--border);
         padding: 12px 14px;
-        text-align: left;
         font-size: 13px;
+        text-align: left;
         cursor: pointer;
         user-select: none;
         white-space: nowrap;
@@ -104,10 +98,37 @@
         color: var(--accent);
       }
 
+      td,
+      th {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
       footer {
         margin-top: 16px;
         font-size: 12px;
         color: var(--muted);
+      }
+
+      /* ===== Skeleton ===== */
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      .skeleton {
+        height: 12px;
+        background: #e5e7eb;
+        border-radius: 6px;
+        animation: pulse 1.2s infinite;
       }
     </style>
   </head>
@@ -115,11 +136,23 @@
   <body>
     <div class="container">
       <h1>Food Database</h1>
-      <div class="subtitle">Click column headers to sort</div>
+      <div class="subtitle">Click headers to sort</div>
 
       <div class="card">
         <div class="table-wrapper">
           <table id="food-table">
+            <colgroup>
+              <col style="width: 220px" />
+              <col style="width: 120px" />
+              <col style="width: 90px" />
+              <col style="width: 90px" />
+              <col style="width: 90px" />
+              <col style="width: 110px" />
+              <col style="width: 130px" />
+              <col style="width: 100px" />
+              <col style="width: 100px" />
+              <col style="width: 130px" />
+            </colgroup>
             <thead>
               <tr>
                 <th data-key="description">
@@ -163,6 +196,7 @@
 
     <script>
       let foodData = [];
+      let isLoading = true;
       let sortState = { key: null, direction: "asc" };
 
       async function getFood() {
@@ -176,6 +210,21 @@
 
         const res = await fetch(`${baseUrl}/foods`);
         return res.json();
+      }
+
+      function renderSkeleton() {
+        const tbody = document.querySelector("#food-table tbody");
+        tbody.innerHTML = "";
+
+        for (let i = 0; i < 30; i++) {
+          const row = document.createElement("tr");
+
+          row.innerHTML = `
+            ${"<td><div class='skeleton'></div></td>".repeat(10)}
+          `;
+
+          tbody.appendChild(row);
+        }
       }
 
       function renderFood(data) {
@@ -205,9 +254,9 @@
       function updateArrows(activeKey, direction) {
         document.querySelectorAll("th").forEach((th) => {
           const arrow = th.querySelector(".sort-arrow");
-          const key = th.dataset.key;
-
           if (!arrow) return;
+
+          const key = th.dataset.key;
 
           if (key !== activeKey) {
             arrow.textContent = "↕";
@@ -220,6 +269,8 @@
       }
 
       function sortData(key) {
+        if (isLoading) return;
+
         const isAsc =
           sortState.key === key ? sortState.direction === "desc" : true;
 
@@ -248,16 +299,23 @@
 
       function attachSorting() {
         document.querySelectorAll("th").forEach((th) => {
-          th.addEventListener("click", () => {
-            sortData(th.dataset.key);
-          });
+          th.addEventListener("click", () => sortData(th.dataset.key));
         });
       }
 
       async function init() {
-        foodData = await getFood();
-        renderFood(foodData);
-        attachSorting();
+        try {
+          isLoading = true;
+          renderSkeleton();
+
+          foodData = await getFood();
+
+          isLoading = false;
+          renderFood(foodData);
+          attachSorting();
+        } catch (err) {
+          console.error("Failed to load food:", err);
+        }
       }
 
       init();
