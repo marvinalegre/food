@@ -3,64 +3,168 @@
   <head>
     <meta charset="UTF-8" />
     <title>Food Table</title>
+
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        padding: 24px;
+      :root {
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --text: #111827;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --hover: #f3f4f6;
+        --accent: #2563eb;
       }
+
+      body {
+        margin: 0;
+        padding: 32px;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Arial;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .container {
+        max-width: 1300px;
+        margin: 0 auto;
+      }
+
       h1 {
+        font-size: 22px;
+        margin-bottom: 6px;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: 13px;
         margin-bottom: 16px;
       }
-      table {
-        width: 100%;
-        border-collapse: collapse;
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
       }
+
+      .table-wrapper {
+        overflow-x: auto;
+        width: 100%;
+        border-radius: 12px;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: max-content; /* key fix */
+        min-width: 100%; /* still fills container if small */
+      }
+
       th,
       td {
-        border: 1px solid #ddd;
-        padding: 8px;
+        white-space: nowrap;
+      }
+
+      thead th {
+        position: sticky;
+        top: 0;
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 14px;
         text-align: left;
-        font-size: 14px;
+        font-size: 13px;
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
       }
-      th {
-        background-color: #f4f4f4;
+
+      tbody td {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+        white-space: nowrap;
       }
-      tr:nth-child(even) {
-        background-color: #fafafa;
+
+      tbody tr:hover {
+        background: var(--hover);
       }
+
+      .sort-arrow {
+        font-size: 11px;
+        margin-left: 6px;
+        color: var(--muted);
+      }
+
+      th:hover .sort-arrow {
+        color: var(--accent);
+      }
+
       footer {
-        margin-top: 24px;
+        margin-top: 16px;
         font-size: 12px;
+        color: var(--muted);
       }
     </style>
   </head>
 
   <body>
-    <h1>Food (sorted by calorie density)</h1>
+    <div class="container">
+      <h1>Food Database</h1>
+      <div class="subtitle">Click column headers to sort</div>
 
-    <table id="food-table">
-      <thead>
-        <tr>
-          <th>Description</th>
-          <th>Serving Size</th>
-          <th>Protein (g)</th>
-          <th>Carbs (g)</th>
-          <th>Fat (g)</th>
-          <th>Sat. Fat (g)</th>
-          <th>Cholesterol (mg)</th>
-          <th>Calories</th>
-          <th>Weight (g)</th>
-          <th>Cal Density (cal/g)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Data will be inserted here -->
-      </tbody>
-    </table>
+      <div class="card">
+        <div class="table-wrapper">
+          <table id="food-table">
+            <thead>
+              <tr>
+                <th data-key="description">
+                  Description <span class="sort-arrow">↕</span>
+                </th>
+                <th data-key="serving_size">
+                  Serving Size <span class="sort-arrow">↕</span>
+                </th>
+                <th data-key="protein_g">
+                  Protein <span class="sort-arrow">↕</span>
+                </th>
+                <th data-key="carbohydrate_g">
+                  Carbs <span class="sort-arrow">↕</span>
+                </th>
+                <th data-key="fat_g">Fat <span class="sort-arrow">↕</span></th>
+                <th data-key="saturated_fat_g">
+                  Sat Fat <span class="sort-arrow">↕</span>
+                </th>
+                <th data-key="cholesterol_mg">
+                  Cholesterol <span class="sort-arrow">↕</span>
+                </th>
+                <th data-key="calories">
+                  Calories <span class="sort-arrow">↕</span>
+                </th>
+                <th data-key="weight_g">
+                  Weight <span class="sort-arrow">↕</span>
+                </th>
+                <th data-key="calorie_density">
+                  Cal Density <span class="sort-arrow">↕</span>
+                </th>
+              </tr>
+            </thead>
 
-    <footer>source: https://www.invive.com/calorie.html</footer>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <footer>source: https://www.invive.com/calorie.html</footer>
+    </div>
 
     <script>
+      let foodData = [];
+      let sortState = { key: null, direction: "asc" };
+
       async function getFood() {
         const isLocal =
           location.hostname === "localhost" ||
@@ -74,24 +178,23 @@
         return res.json();
       }
 
-      function renderFood(food) {
+      function renderFood(data) {
         const tbody = document.querySelector("#food-table tbody");
-
         tbody.innerHTML = "";
 
-        food.forEach((item) => {
+        data.forEach((item) => {
           const row = document.createElement("tr");
 
           row.innerHTML = `
             <td>${item.description}</td>
             <td>${item.serving_size}</td>
-            <td>${item.protein_g}</td>
-            <td>${item.carbohydrate_g}</td>
-            <td>${item.fat_g}</td>
-            <td>${item.saturated_fat_g}</td>
-            <td>${item.cholesterol_mg}</td>
-            <td>${item.calories}</td>
-            <td>${item.weight_g}</td>
+            <td>${item.protein_g ?? "-"}</td>
+            <td>${item.carbohydrate_g ?? "-"}</td>
+            <td>${item.fat_g ?? "-"}</td>
+            <td>${item.saturated_fat_g ?? "-"}</td>
+            <td>${item.cholesterol_mg ?? "-"}</td>
+            <td>${item.calories ?? "-"}</td>
+            <td>${item.weight_g ?? "-"}</td>
             <td>${Number(item.calorie_density).toFixed(2)}</td>
           `;
 
@@ -99,13 +202,62 @@
         });
       }
 
+      function updateArrows(activeKey, direction) {
+        document.querySelectorAll("th").forEach((th) => {
+          const arrow = th.querySelector(".sort-arrow");
+          const key = th.dataset.key;
+
+          if (!arrow) return;
+
+          if (key !== activeKey) {
+            arrow.textContent = "↕";
+            arrow.style.color = "#6b7280";
+          } else {
+            arrow.textContent = direction === "asc" ? "▲" : "▼";
+            arrow.style.color = "#2563eb";
+          }
+        });
+      }
+
+      function sortData(key) {
+        const isAsc =
+          sortState.key === key ? sortState.direction === "desc" : true;
+
+        sortState.key = key;
+        sortState.direction = isAsc ? "asc" : "desc";
+
+        foodData.sort((a, b) => {
+          const valA = a[key];
+          const valB = b[key];
+
+          if (valA == null) return 1;
+          if (valB == null) return -1;
+
+          if (typeof valA === "number" && typeof valB === "number") {
+            return isAsc ? valA - valB : valB - valA;
+          }
+
+          return isAsc
+            ? String(valA).localeCompare(String(valB))
+            : String(valB).localeCompare(String(valA));
+        });
+
+        updateArrows(key, sortState.direction);
+        renderFood(foodData);
+      }
+
+      function attachSorting() {
+        document.querySelectorAll("th").forEach((th) => {
+          th.addEventListener("click", () => {
+            sortData(th.dataset.key);
+          });
+        });
+      }
+
       async function init() {
-        try {
-          const food = await getFood();
-          renderFood(food);
-        } catch (err) {
-          console.error("Failed to load food:", err);
-        }
+        foodData = await getFood();
+        renderFood(foodData);
+        attachSorting();
       }
 
       init();
